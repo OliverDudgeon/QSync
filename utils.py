@@ -7,24 +7,15 @@ import numpy as np
 
 
 def plot_wigner(
-    state: np.ndarray,
-    x: np.ndarray,
-    y: np.ndarray,
-    *,
-    cmap: Union[None, str] = None,
-    ax: Union[None, plt.Axes] = None
+    state: np.ndarray, x: np.ndarray, y: np.ndarray, *, cmap: Union[None, str] = None, ax: Union[None, plt.Axes] = None
 ) -> Union[Tuple[plt.Axes, mpl.image.AxesImage], None]:
     wigner_rep = wigner(state, x, y)
 
-    args = [wigner_rep]
-    if cmap is not None:
-        args.append(cmap)
-
+    fig = None
     if ax is None:
-        plt.imshow(*args)
-        plt.colorbar()
-        return None
-    else:
-        _, new_ax = plt.subplots()
-        img = new_ax.imshow(*args)
-        return new_ax, img
+        fig, ax = plt.subplots()
+
+    img = ax.imshow(wigner_rep, extent=[min(x), max(x), min(y), max(y)], origin="lower", cmap=cmap)
+    (fig or plt).colorbar(img, ax=ax)
+
+    return ax, img
