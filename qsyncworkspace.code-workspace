@@ -4,5 +4,13 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"cSpell.words": [
+			"cmap",
+			"colorbar",
+			"imshow",
+			"ndarray",
+			"qutip"
+		]
+	}
 }
