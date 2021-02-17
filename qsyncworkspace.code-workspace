@@ -11,10 +11,12 @@
 			"husimi",
 			"imshow",
 			"ndarray",
+			"pcolormesh",
 			"qfunc",
 			"qutip",
 			"xaxis",
 			"xlabel",
+			"yaxis",
 			"ylabel"
 		],
 		"python.formatting.provider": "black",
