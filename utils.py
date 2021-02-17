@@ -1,4 +1,4 @@
-from typing import Union, Tuple, Literal
+from typing import Union, Tuple, Literal, Optional
 from functools import partial
 
 import numpy as np
@@ -18,10 +18,12 @@ def plot_representation(
     x: np.ndarray,
     y: np.ndarray,
     *,
-    cmap: Union[None, str] = None,
-    ax: Union[None, plt.Axes] = None
-) -> Union[Tuple[plt.Axes, mpl.image.AxesImage], None]:
-    fig = None
+    cmap: Optional[str] = None,
+    ax: Optional[plt.Axes] = None,
+    fig: Optional[plt.Figure] = None
+) -> Tuple[np.ndarray, Tuple[plt.Axes, mpl.image.AxesImage]]:
+    if bool(fig) ^ bool(ax):
+        raise Exception("A fig and ax must be both passed or not at all")
     if ax is None:
         fig, ax = plt.subplots()
 
@@ -34,29 +36,45 @@ def plot_representation(
         rep = qfunc(state, x, y)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
-    elif rep_name == "spin_qfunc":
-        rep, *_ = spin_q_function(state, x, y)
-        ax.set_xlabel(r"$\theta$")
-        ax.set_ylabel(r"$\varphi$")
-        ax.xaxis.set_major_formatter(
-            FuncFormatter(lambda val, _: "{:.0g}$\pi$".format(val / np.pi) if val != 0 else "0")
-        )
-        ax.xaxis.set_major_locator(MultipleLocator(base=np.pi))
-
-        ax.yaxis.set_major_formatter(
-            FuncFormatter(lambda val, _: "{:.0g}$\pi$".format(val / np.pi) if val != 0 else "0")
-        )
-        ax.yaxis.set_major_locator(MultipleLocator(base=np.pi))
 
     if rep is None:
         raise Exception("Called with an invalid rep_name")
 
-    img = ax.imshow(rep, extent=[min(x), max(x), min(y), max(y)], origin="lower", cmap=cmap)
+    img = ax.imshow(rep, extent=[min(x), max(x), min(y), max(y)], origin="lower", aspect="auto", cmap=cmap)
     (fig or plt).colorbar(img, ax=ax)
 
-    return ax, img
+    return rep, (ax, img)
 
 
 plot_wigner = partial(plot_representation, "wigner")
 plot_qfunc = partial(plot_representation, "qfunc")
-plot_spin_qfunc = partial(plot_representation, "spin_qfunc")
+
+
+def plot_spin_qfunc(
+    state: np.ndarray,
+    phi: np.ndarray,
+    theta: np.ndarray,
+    *,
+    cmap: Optional[str] = None,
+    ax: Optional[plt.Axes] = None,
+    fig: Optional[plt.Figure] = None
+) -> Tuple[np.ndarray, Tuple[plt.Axes, mpl.collections.QuadMesh]]:
+    if bool(fig) ^ bool(ax):
+        raise Exception("A fig and ax must be both passed or not at all")
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    Q, THETA, PHI = spin_q_function(state, phi, theta)
+
+    ax.set_xlabel(r"$\varphi$")
+    ax.set_ylabel(r"$\theta$")
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda val, _: "{:.0g}$\pi$".format(val / np.pi) if val != 0 else "0"))
+    ax.xaxis.set_major_locator(MultipleLocator(base=np.pi))
+
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda val, _: "{:.0g}$\pi$".format(val / np.pi) if val != 0 else "0"))
+    ax.yaxis.set_major_locator(MultipleLocator(base=np.pi))
+
+    img = ax.pcolormesh(PHI, THETA, Q, cmap=cmap)
+    fig.colorbar(img, ax=ax)
+
+    return Q, (ax, img)
