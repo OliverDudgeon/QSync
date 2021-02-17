@@ -8,9 +8,21 @@
 		"cSpell.words": [
 			"cmap",
 			"colorbar",
+			"husimi",
 			"imshow",
 			"ndarray",
-			"qutip"
-		]
+			"qfunc",
+			"qutip",
+			"xaxis",
+			"xlabel",
+			"ylabel"
+		],
+		"python.formatting.provider": "black",
+		"python.linting.mypyEnabled": true,
+		"python.linting.enabled": true,
+		"python.formatting.blackArgs": [
+			"--line-length",
+			"119"
+		],
 	}
 }
