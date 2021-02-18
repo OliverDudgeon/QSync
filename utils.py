@@ -1,15 +1,20 @@
-from typing import Union, Tuple, Literal, Optional
+from typing import Tuple, Literal, Optional
 from functools import partial
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter, MultipleLocator
 import matplotlib as mpl
+from scipy import integrate
 
 from qutip import wigner, qfunc, spin_q_function
 
 xlabel = r"$\rm{Re}(\alpha)$"
 ylabel = r"$\rm{Im}(\alpha)$"
+
+
+def pi_formatter(val, _):
+    return "{:.0g}$\pi$".format(val / np.pi) if val != 0 else "0"
 
 
 def plot_representation(
@@ -52,8 +57,8 @@ plot_qfunc = partial(plot_representation, "qfunc")
 
 def plot_spin_qfunc(
     state: np.ndarray,
-    phi: np.ndarray,
     theta: np.ndarray,
+    phi: np.ndarray,
     *,
     cmap: Optional[str] = None,
     ax: Optional[plt.Axes] = None,
@@ -64,17 +69,43 @@ def plot_spin_qfunc(
     if ax is None:
         fig, ax = plt.subplots()
 
-    Q, THETA, PHI = spin_q_function(state, phi, theta)
+    Q, THETA, PHI = spin_q_function(state, theta, phi)
 
     ax.set_xlabel(r"$\varphi$")
     ax.set_ylabel(r"$\theta$")
-    ax.xaxis.set_major_formatter(FuncFormatter(lambda val, _: "{:.0g}$\pi$".format(val / np.pi) if val != 0 else "0"))
+    ax.xaxis.set_major_formatter(FuncFormatter(pi_formatter))
     ax.xaxis.set_major_locator(MultipleLocator(base=np.pi))
 
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda val, _: "{:.0g}$\pi$".format(val / np.pi) if val != 0 else "0"))
+    ax.yaxis.set_major_formatter(FuncFormatter(pi_formatter))
     ax.yaxis.set_major_locator(MultipleLocator(base=np.pi))
 
-    img = ax.pcolormesh(PHI, THETA, Q, cmap=cmap)
+    img = ax.pcolormesh(PHI, THETA, Q, cmap=cmap, shading="nearest")
     fig.colorbar(img, ax=ax)
 
     return Q, (ax, img)
+
+
+def plot_S_measure(
+    Q: np.ndarray,
+    theta: np.ndarray,
+    phi: np.ndarray,
+    *,
+    ax: Optional[plt.Axes] = None,
+    fig: Optional[plt.Figure] = None
+):
+    if bool(fig) ^ bool(ax):
+        raise Exception("A fig and ax must be both passed or not at all")
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    # Calculate synchronisation measure from Q representation
+    S = integrate.simps(np.sin(theta) * Q, theta, axis=1) - 1 / (2 * np.pi)
+
+    (line,) = ax.plot(phi, S)
+    ax.set_xlabel(r"$\varphi$")
+    ax.set_ylabel(r"$S(\varphi|\hat\rho)$")
+
+    ax.xaxis.set_major_formatter(FuncFormatter(pi_formatter))
+    ax.xaxis.set_major_locator(MultipleLocator(base=np.pi))
+
+    return line
