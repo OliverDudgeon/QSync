@@ -63,7 +63,7 @@ def plot_spin_qfunc(
     cmap: Optional[str] = None,
     ax: Optional[plt.Axes] = None,
     fig: Optional[plt.Figure] = None
-) -> Tuple[np.ndarray, Tuple[plt.Axes, mpl.collections.QuadMesh]]:
+):
     if bool(fig) ^ bool(ax):
         raise Exception("A fig and ax must be both passed or not at all")
     if ax is None:
@@ -82,7 +82,7 @@ def plot_spin_qfunc(
     img = ax.pcolormesh(PHI, THETA, Q, cmap=cmap, shading="nearest")
     fig.colorbar(img, ax=ax)
 
-    return Q, (ax, img)
+    return Q, THETA, PHI, (ax, img)
 
 
 def plot_S_measure(
@@ -99,7 +99,7 @@ def plot_S_measure(
         fig, ax = plt.subplots()
 
     # Calculate synchronisation measure from Q representation
-    S = integrate.simps(np.sin(theta) * Q, theta, axis=1) - 1 / (2 * np.pi)
+    S = integrate.simps(np.sin(theta) * Q, theta) - 1 / (2 * np.pi)
 
     (line,) = ax.plot(phi, S)
     ax.set_xlabel(r"$\varphi$")
