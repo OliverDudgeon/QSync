@@ -6,10 +6,16 @@
 	],
 	"settings": {
 		"cSpell.words": [
+			"Qobj",
+			"Qsize",
 			"cmap",
 			"colorbar",
+			"dtype",
+			"expm",
+			"fock",
 			"husimi",
 			"imshow",
+			"jmat",
 			"ndarray",
 			"pcolormesh",
 			"qfunc",

@@ -1,13 +1,12 @@
-from typing import Tuple, Literal, Optional
 from functools import partial
+from typing import Literal, Optional, Tuple
 
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter, MultipleLocator
 import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.ticker import FuncFormatter, MultipleLocator
+from qutip import Qobj, expect, jmat, qfunc, spin_coherent, spin_q_function, wigner, spin_state
 from scipy import integrate
-
-from qutip import wigner, qfunc, spin_q_function
 
 xlabel = r"$\rm{Re}(\alpha)$"
 ylabel = r"$\rm{Im}(\alpha)$"
@@ -28,7 +27,7 @@ def plot_representation(
     fig: Optional[plt.Figure] = None
 ) -> Tuple[np.ndarray, Tuple[plt.Axes, mpl.image.AxesImage]]:
     if bool(fig) ^ bool(ax):
-        raise Exception("A fig and ax must be both passed or not at all")
+        raise TypeError("A fig and ax must be both passed or not at all")
     if ax is None:
         fig, ax = plt.subplots()
 
@@ -55,6 +54,26 @@ plot_wigner = partial(plot_representation, "wigner")
 plot_qfunc = partial(plot_representation, "qfunc")
 
 
+def my_spin_coherent_dm(j, theta, phi):
+    Qsize = [phi.size, theta.size]
+    Sp = np.ones(Qsize, dtype=Qobj) * jmat(j, "+")
+    Sm = np.ones(Qsize, dtype=Qobj) * jmat(j, "-")
+
+    expm = np.vectorize(lambda qobj: qobj.expm(), otypes=[Qobj])
+
+    psi = expm(0.5 * theta * np.exp(1j * phi) * Sm - 0.5 * theta * np.exp(-1j * phi) * Sp) * spin_state(j, j)
+
+    return psi
+
+
+def my_spin_q_func(density_op, phi, theta):
+    Qsize = [phi.size, theta.size]
+    cs = my_spin_coherent_dm(0.5, theta, phi)
+
+    Q = expect(density_op, cs.flatten()) / (2 * np.pi)
+    return Q.reshape(Qsize)
+
+
 def plot_spin_qfunc(
     state: np.ndarray,
     theta: np.ndarray,
@@ -65,7 +84,7 @@ def plot_spin_qfunc(
     fig: Optional[plt.Figure] = None
 ):
     if bool(fig) ^ bool(ax):
-        raise Exception("A fig and ax must be both passed or not at all")
+        raise TypeError("A fig and ax must be both passed or not at all")
     if ax is None:
         fig, ax = plt.subplots()
 
@@ -85,6 +104,12 @@ def plot_spin_qfunc(
     return Q, THETA, PHI, (ax, img)
 
 
+def spin_S_measure(theta, Q):
+    # Calculate synchronisation measure from Q representation
+    # theta parameter and theta 'axis' of Q should be the same.
+    return integrate.simps(np.sin(theta) * Q, theta) - 1 / (2 * np.pi)
+
+
 def plot_S_measure(
     Q: np.ndarray,
     theta: np.ndarray,
@@ -94,12 +119,11 @@ def plot_S_measure(
     fig: Optional[plt.Figure] = None
 ):
     if bool(fig) ^ bool(ax):
-        raise Exception("A fig and ax must be both passed or not at all")
+        raise TypeError("A fig and ax must be both passed or not at all")
     if ax is None:
         fig, ax = plt.subplots()
 
-    # Calculate synchronisation measure from Q representation
-    S = integrate.simps(np.sin(theta) * Q, theta) - 1 / (2 * np.pi)
+    S = spin_S_measure(theta, Q)
 
     (line,) = ax.plot(phi, S)
     ax.set_xlabel(r"$\varphi$")
