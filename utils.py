@@ -7,6 +7,29 @@ import numpy as np
 from matplotlib.ticker import FuncFormatter, MultipleLocator
 from qutip import Qobj, expect, jmat, qfunc, spin_coherent, spin_q_function, wigner, spin_state
 from scipy import integrate
+import cProfile, pstats, io
+from scipy.linalg import expm
+
+
+def profile(fnc):
+
+    """A decorator that uses cProfile to profile a function"""
+
+    def inner(*args, **kwargs):
+
+        pr = cProfile.Profile()
+        pr.enable()
+        retval = fnc(*args, **kwargs)
+        pr.disable()
+        s = io.StringIO()
+        sortby = "cumulative"
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
+        return retval
+
+    return inner
+
 
 xlabel = r"$\rm{Re}(\alpha)$"
 ylabel = r"$\rm{Im}(\alpha)$"
@@ -59,13 +82,14 @@ def my_spin_coherent_dm(j, theta, phi):
     Sp = np.ones(Qsize, dtype=Qobj) * jmat(j, "+")
     Sm = np.ones(Qsize, dtype=Qobj) * jmat(j, "-")
 
-    expm = np.vectorize(lambda qobj: qobj.expm(), otypes=[Qobj])
+    vexpm = np.vectorize(lambda v: Qobj(expm(v.full())), otypes=[Qobj])
 
-    psi = expm(0.5 * theta * np.exp(1j * phi) * Sm - 0.5 * theta * np.exp(-1j * phi) * Sp) * spin_state(j, j)
+    psi = vexpm(0.5 * theta * np.exp(1j * phi) * Sm - 0.5 * theta * np.exp(-1j * phi) * Sp) * spin_state(j, j)
 
     return psi
 
 
+@profile
 def my_spin_q_func(density_op, phi, theta):
     Qsize = [phi.size, theta.size]
     cs = my_spin_coherent_dm(0.5, theta, phi)
