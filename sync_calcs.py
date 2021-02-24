@@ -3,6 +3,8 @@ from qutip import Qobj, expect, jmat, spin_state
 from scipy import integrate
 from scipy.linalg import expm
 
+from utils import profile
+
 
 def spin_S_measure(theta, Q):
     # Calculate synchronisation measure from Q representation
