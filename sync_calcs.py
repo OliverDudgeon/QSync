@@ -4,7 +4,7 @@ from scipy import integrate
 from scipy.linalg import expm
 
 
-def spin_S_measure(S, theta, Q):
+def spin_S_measure(theta, Q):
     # Calculate synchronisation measure from Q representation
     # theta parameter and theta 'axis' of Q should be the same.
 
@@ -24,10 +24,9 @@ def my_spin_coherent_dm(j, theta, phi):
 
 
 # @profile
-def my_spin_q_func(density_op, phi, theta):
+def my_spin_q_func(J, density_op, phi, theta):
     Qsize = [phi.size, theta.size]
-    cs = my_spin_coherent_dm(0.5, theta, phi)
+    cs = my_spin_coherent_dm(J, theta, phi)
 
-    # TODO: implement higher order spin factor
-    Q = expect(density_op, cs.flatten()) / (2 * np.pi)
+    Q = (2 * J + 1) / (4 * np.pi) * expect(density_op, cs.flatten())
     return Q.reshape(Qsize)
