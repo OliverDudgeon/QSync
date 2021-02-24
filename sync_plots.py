@@ -107,4 +107,4 @@ def plot_S_measure(
 
     angle_xaxis(ax)
 
-    return line
+    return line, (ax, fig)

@@ -8,7 +8,6 @@ def spin_S_measure(S, theta, Q):
     # Calculate synchronisation measure from Q representation
     # theta parameter and theta 'axis' of Q should be the same.
 
-    # TODO: implement higher order spin factor
     return integrate.simps(np.sin(theta) * Q, theta) - 1 / (2 * np.pi)
 
 
@@ -29,5 +28,6 @@ def my_spin_q_func(density_op, phi, theta):
     Qsize = [phi.size, theta.size]
     cs = my_spin_coherent_dm(0.5, theta, phi)
 
+    # TODO: implement higher order spin factor
     Q = expect(density_op, cs.flatten()) / (2 * np.pi)
     return Q.reshape(Qsize)
