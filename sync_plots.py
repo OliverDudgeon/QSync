@@ -27,15 +27,7 @@ def angle_yaxis(ax):
 
 
 def plot_representation(
-    rep_name: Literal["wigner", "qfunc", "spin_qfunc"],
-    state: np.ndarray,
-    x: np.ndarray,
-    y: np.ndarray,
-    *,
-    cmap: Optional[str] = None,
-    ax: Optional[plt.Axes] = None,
-    fig: Optional[plt.Figure] = None,
-    **kwargs
+    rep_name: Literal["wigner", "qfunc", "spin_qfunc"], state, x, y, *, cmap=None, ax=None, fig=None, **kwargs
 ) -> Tuple[np.ndarray, Tuple[plt.Axes, mpl.image.AxesImage]]:
     if bool(fig) ^ bool(ax):
         raise TypeError("A fig and ax must be both passed or not at all")
@@ -65,16 +57,7 @@ plot_wigner = partial(plot_representation, "wigner")
 plot_qfunc = partial(plot_representation, "qfunc")
 
 
-def plot_spin_qfunc(
-    Q: np.ndarray,
-    theta: np.ndarray,
-    phi: np.ndarray,
-    *,
-    cmap: Optional[str] = None,
-    ax: Optional[plt.Axes] = None,
-    fig: Optional[plt.Figure] = None,
-    **kwargs
-):
+def plot_spin_qfunc(Q, theta, phi, *, cmap=None, ax=None, fig=None, **kwargs):
     if bool(fig) ^ bool(ax):
         raise TypeError("A fig and ax must be both passed or not at all")
     if ax is None:
@@ -87,15 +70,13 @@ def plot_spin_qfunc(
 
     THETA, PHI = np.meshgrid(theta, phi)  # need a meshgrid for pcolor-type plots
 
-    img = ax.pcolormesh(PHI, THETA, Q, cmap=cmap, shading="nearest", **kwargs)
+    img = ax.pcolormesh(THETA, PHI, Q, cmap=cmap, shading="nearest", **kwargs)
     fig.colorbar(img, ax=ax)
 
     return ax, img
 
 
-def plot_S_measure(
-    S: np.ndarray, phi: np.ndarray, *, ax: Optional[plt.Axes] = None, fig: Optional[plt.Figure] = None, **kwargs
-):
+def plot_S_measure(S, phi, *, ax=None, fig=None, **kwargs):
     if bool(fig) ^ bool(ax):
         raise TypeError("A fig and ax must be both passed or not at all")
     if ax is None:
