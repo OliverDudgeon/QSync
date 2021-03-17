@@ -21,7 +21,12 @@ def spin_S_measure(theta, Q):
 
 
 def my_spin_coherent_dm(j, theta, phi):
-    Qsize = [phi.size, theta.size]
+    Qsize = [1, 1]
+    if isinstance(theta, np.ndarray):
+        Qsize[1] = theta.size
+    if isinstance(phi, np.ndarray):
+        Qsize[0] = phi.size
+
     Sp = np.ones(Qsize, dtype=Qobj) * jmat(j, "+")
     Sm = np.ones(Qsize, dtype=Qobj) * jmat(j, "-")
 
@@ -41,4 +46,3 @@ def my_spin_q_func(density_op, theta, phi):
 
     Q = (2 * J + 1) / (4 * np.pi) * expect(density_op, cs.flatten())
     return Q.reshape(Qsize)
-

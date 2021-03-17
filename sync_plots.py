@@ -89,3 +89,4 @@ def plot_S_measure(S, phi, *, ax=None, fig=None, **kwargs):
     angle_xaxis(ax)
 
     return line, (ax, fig)
+

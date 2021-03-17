@@ -31,11 +31,12 @@
 			"ylabel"
 		],
 		"python.formatting.provider": "black",
-		"python.linting.mypyEnabled": true,
 		"python.linting.enabled": true,
 		"python.formatting.blackArgs": [
 			"--line-length",
 			"119"
 		],
+		"jupyter.jupyterServerType": "local",
+		"python.pythonPath": "C:\\Users\\Oliver\\miniconda3\\envs\\qutip-env\\python.exe",
 	}
 }
