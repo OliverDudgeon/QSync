@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Union
 import numpy as np
 from qutip import Qobj, expect, jmat, spin_state, steadystate, lindblad_dissipator, spin_q_function
 from scipy import integrate

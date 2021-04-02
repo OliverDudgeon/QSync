@@ -70,10 +70,11 @@ def plot_spin_qfunc(Q, theta, phi, *, cmap=None, ax=None, fig=None, **kwargs):
 
     THETA, PHI = np.meshgrid(theta, phi)  # need a meshgrid for pcolor-type plots
 
-    img = ax.pcolormesh(THETA, PHI, Q, cmap=cmap, shading="nearest", **kwargs)
+    # img = ax.pcolormesh(THETA, PHI, Q, cmap=cmap, shading="nearest", **kwargs)
+    img = ax.contourf(THETA, PHI, Q, 100)
     fig.colorbar(img, ax=ax)
 
-    return ax, img
+    return img, ax
 
 
 def plot_S_measure(S, phi, *, ax=None, fig=None, **kwargs):
@@ -90,3 +91,14 @@ def plot_S_measure(S, phi, *, ax=None, fig=None, **kwargs):
 
     return line, (ax, fig)
 
+
+def plot_Q_and_S(theta, phi, Q, S, *, cmap=None, axs=None, fig=None, **kwargs):
+    if bool(fig) ^ bool(axs):
+        raise TypeError("A fig and ax must be both passed or not at all")
+    if axs is None:
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[15, 5])
+
+    img, *_ = plot_spin_qfunc(Q, phi, theta, cmap=cmap, ax=ax1, fig=fig)
+    line, *_ = plot_S_measure(S, phi, ax=ax2, fig=fig)
+
+    return img, line, fig, (ax1, ax2)

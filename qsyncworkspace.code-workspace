@@ -38,5 +38,7 @@
 		],
 		"jupyter.jupyterServerType": "local",
 		"python.pythonPath": "C:\\Users\\Oliver\\miniconda3\\envs\\qutip-env\\python.exe",
+		"workbench.colorTheme": "Quiet Light",
+		"files.autoSave": "afterDelay",
 	}
 }
