@@ -8,8 +8,8 @@ from qutip.qip.circuit import *
 
 def Uevo(args):
     delta, epsilon, dt = args
-    Rz = (1j * delta * sigmaz() * dt).expm()
-    Ry = (1j * epsilon * sigmay() * dt / 2).expm()
+    Rz = (1j * delta * sigmaz()/2 * dt).expm()
+    Ry = (1j * epsilon * sigmay()/2 * dt / 2).expm()
     return Rz * Ry * Rz
 
 
