@@ -7,9 +7,9 @@ from qutip.qip.circuit import *
 
 
 def Uevo(args):
-    delta, epsilon, dt = args
-    Rz = (1j * delta * sigmaz()/2 * dt).expm()
-    Ry = (1j * epsilon * sigmay()/2 * dt / 2).expm()
+    detuning, signal_strength, dt = args
+    Rz = (1j * detuning / 2 * sigmaz() / 2 * dt).expm()
+    Ry = (1j * 2 * signal_strength * sigmay() / 2 * dt / 2).expm()
     return Rz * Ry * Rz
 
 
@@ -34,9 +34,21 @@ def reset(reg, bit, new):
 # Circuit
 
 
+def add_unitary_evo_gates(qc, detuning, signal_strength, dt):
+    # qc.add_gate("RZ", arg_value=-detuning * dt / 2, targets=0)
+    # qc.add_gate("RY", arg_value=-signal_strength * dt, targets=0)
+    # qc.add_gate("RZ", arg_value=-detuning * dt / 2, targets=0)
+
+    phi = gamma = -detuning * dt / 2
+    theta = -signal_strength * dt
+    qc.add_gate("QASMU", arg_value=[theta, phi, gamma], targets=0)
+
+    return qc
+
+
 def unitary_circuit(detuning, signal_strength, dt):
-    qc = QubitCircuit(2, user_gates={"Uevo": Uevo}, num_cbits=1)
-    qc.add_gate("Uevo", arg_value=[detuning, signal_strength, dt])
+    qc = QubitCircuit(2)
+    add_unitary_evo_gates(qc, detuning, signal_strength, dt)
 
     return qc
 
