@@ -24,6 +24,8 @@ def CU(args, N=2, control=0, target=1, control_value=1):
 
 
 def reset(reg, bit, new):
+    if reg.type == "ket":
+        reg = ket2dm(reg)
     """Reset the qubit at position bit of reg with dm new"""
     traces = [reg.ptrace(i) for i in range(int(np.log2(reg.shape[0])))]
 
