@@ -48,6 +48,23 @@ def add_unitary_evo_gates(qc, detuning, signal_strength, dt):
     return qc
 
 
+def add_loss_gates(qc, theta_d):
+    qc.add_gate("CU", arg_value=[theta_d, 0, 0])
+    qc.add_gate("CNOT", targets=[0], controls=[1])
+
+    return qc
+
+
+def add_gain_gates(qc, theta_g):
+    qc.add_gate("QASMU", targets=0, arg_value=[-np.pi, 0, 0])
+    qc.add_gate("CNOT", targets=[1], controls=[0])
+    qc.add_gate("CU", arg_value=[theta_g, 0, 0])
+    qc.add_gate("CNOT", targets=[1], controls=[0])
+    qc.add_gate("QASMU", targets=0, arg_value=[np.pi, 0, 0])
+
+    return qc
+
+
 def unitary_circuit(detuning, signal_strength, dt):
     qc = QubitCircuit(2)
     add_unitary_evo_gates(qc, detuning, signal_strength, dt)
@@ -59,15 +76,37 @@ def unitary_and_damping_circuit(detuning, signal_strength, dt, theta):
     def CUc0t1(args):
         return CU(args)
 
-    qc = QubitCircuit(2, user_gates={"CU": CUc0t1, "Uevo": Uevo}, num_cbits=1)
+    qc = QubitCircuit(2, user_gates={"CU": CUc0t1}, num_cbits=1)
 
-    qc.add_gate("Uevo", arg_value=[detuning, signal_strength, dt])
+    add_unitary_evo_gates(qc, detuning, signal_strength, dt)
 
     qc.add_gate("CU", arg_value=[theta, 0, 0])
     qc.add_gate("CNOT", targets=[0], controls=[1])
     qc.add_measurement("M", [1], classical_store=0)
 
     return qc
+
+
+def unitary_and_dissipative(detuning, signal_strength, dt, theta_d, theta_g):
+    """Create QuTip quantum circuits for unitary evolution and dissipation
+    Split into two circuits to allow for resets."""
+
+    def CUc0t1(args):
+        return CU(args)
+
+    qc1 = QubitCircuit(2, user_gates={"CU": CUc0t1}, num_cbits=1)
+    add_unitary_evo_gates(qc1, detuning, signal_strength, dt)
+
+    # Loss
+    add_loss_gates(qc1, theta_d)
+    qc1.add_measurement("M1", [1], classical_store=0)
+
+    # Gain
+    qc2 = QubitCircuit(2, user_gates={"CU": CUc0t1}, num_cbits=1)
+    add_gain_gates(qc2, theta_g)
+    qc2.add_measurement("M2", [1], classical_store=0)
+
+    return qc1, qc2
 
 
 def run_simu(qc, interations, initial_state=basis(2, 0)):
