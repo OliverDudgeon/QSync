@@ -7,6 +7,7 @@ import numpy as np
 from matplotlib.ticker import FuncFormatter, MultipleLocator
 from qutip import qfunc, wigner
 
+from sync_calcs import spin_husimi_qfunc, spin_S_measure
 
 coherent_xlabel = r"$\rm{Re}(\alpha)$"
 coherent_ylabel = r"$\rm{Im}(\alpha)$"
@@ -102,3 +103,17 @@ def plot_Q_and_S(theta, phi, Q, S, *, cmap=None, axs=None, fig=None, **kwargs):
     line, *_ = plot_S_measure(S, phi, ax=ax2, fig=fig)
 
     return img, line, fig, (ax1, ax2)
+
+
+def calc_and_plot_Q_and_S(state, n=50, theta=None, phi=None, method="qutip"):
+
+    if theta is None:
+        theta = np.linspace(0, np.pi, n)
+
+    if phi is None:
+        phi = np.linspace(-np.pi, np.pi, 2 * n).reshape(-1, 1)  # 1D vector -> 2D column vector
+
+    Q = spin_husimi_qfunc(state, theta, phi, method=method)
+    S = spin_S_measure(theta, Q)
+
+    _ = plot_Q_and_S(theta, phi, Q.T, S)

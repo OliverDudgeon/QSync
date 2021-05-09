@@ -87,26 +87,24 @@ def unitary_and_damping_circuit(detuning, signal_strength, dt, theta):
     return qc
 
 
-def unitary_and_dissipative(detuning, signal_strength, dt, theta_d, theta_g):
+def dissipative_circuits(theta_d, theta_g):
     """Create QuTip quantum circuits for unitary evolution and dissipation
     Split into two circuits to allow for resets."""
 
     def CUc0t1(args):
         return CU(args)
 
-    qc1 = QubitCircuit(2, user_gates={"CU": CUc0t1}, num_cbits=1)
-    add_unitary_evo_gates(qc1, detuning, signal_strength, dt)
-
     # Loss
-    add_loss_gates(qc1, theta_d)
-    qc1.add_measurement("M1", [1], classical_store=0)
+    loss_qc = QubitCircuit(2, user_gates={"CU": CUc0t1}, num_cbits=1)
+    add_loss_gates(loss_qc, theta_d)
+    loss_qc.add_measurement("M1", [1], classical_store=0)
 
     # Gain
-    qc2 = QubitCircuit(2, user_gates={"CU": CUc0t1}, num_cbits=1)
-    add_gain_gates(qc2, theta_g)
-    qc2.add_measurement("M2", [1], classical_store=0)
+    gain_qc = QubitCircuit(2, user_gates={"CU": CUc0t1}, num_cbits=1)
+    add_gain_gates(gain_qc, theta_g)
+    gain_qc.add_measurement("M2", [1], classical_store=0)
 
-    return qc1, qc2
+    return loss_qc, gain_qc
 
 
 def run_simu(qc, interations, initial_state=basis(2, 0)):

@@ -69,7 +69,8 @@ def spin_husimi_qfunc(density_op, theta, phi, *, method="su2"):
             + A * B.conj() * density_op[0, 1]
             + B * B.conj() * density_op[0, 0]
         ) / (2 * np.pi)
-        assert np.count_nonzero(Q.imag) == 0
+        # assert np.count_nonzero(Q.imag) == 0
+        assert np.all(np.abs(Q.imag) < 1e-10)
         return Q.real
 
 
