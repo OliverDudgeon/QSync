@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from qutip import *
 from qutip.qip.circuit import *
 
+from copy import deepcopy
+
 # Unitary Evolution
 
 
@@ -125,3 +127,30 @@ def run_simu(qc, interations, initial_state=basis(2, 0)):
 # for _ in range(10):
 #     final = sim.run(final).get_final_states()[0]
 #     b.add_states(final.ptrace(0))
+
+
+def add_tomography(circuit):
+    """Qiskit: Add tomography circuits with measurments on existing classical register"""
+    # This function add gates to the end of circuits but the measurments add to a new classical register.
+    # This additional register messes with noise mitigation so the next function adds the same gates but
+    # the classical register is reused.
+
+    for i in range(3):
+        c = deepcopy(circuit)
+        qreg = c.qregs[0]
+        creg = c.cregs[0]
+
+        c.barrier()
+        if i == 0:
+            c.h(qreg[0])
+            c.name = f"('X',)"  # Need to addjust names for StateTomographyFitter
+        elif i == 1:
+            c.sdg(qreg[0])
+            c.h(qreg[0])
+            c.name = f"('Y',)"
+        elif i == 2:
+            c.name = f"('Z',)"
+
+        c.measure(qreg[0], creg[0])
+
+        yield c
