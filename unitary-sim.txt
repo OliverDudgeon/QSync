@@ -1,3 +1,12 @@
+Parameters: (I think)
+gain_amp = 0.1
+loss_amp = 1
+m = min(loss_amp, gain_amp)
+
+detuning = 3 * m
+signal_strength = 2 * m
+dt = 0.5
+
 Calibration:
 ea3548759e30418eb70b6795fa3ffbb0-16206550744488924
 

@@ -5,6 +5,20 @@ from qutip.qip.circuit import *
 
 from copy import deepcopy
 
+
+def U(args):
+    """Custom Implementation of QASM U Gate since QuTip's is different
+    See QASM Docs / Koppenhofer Thesis
+    """
+    theta, phi, gamma = args
+    return Qobj(
+        [
+            [np.cos(theta / 2), -np.exp(1j * gamma) * np.sin(theta / 2)],
+            [np.exp(1j * phi) * np.sin(theta / 2), np.exp(1j * (phi + gamma)) * np.cos(theta / 2)],
+        ]
+    )
+
+
 # Unitary Evolution
 
 
@@ -19,7 +33,7 @@ def Uevo(args):
 
 
 def CU(args, N=2, control=0, target=1, control_value=1):
-    return controlled_gate(qasmu_gate(args), N, control, target, control_value)
+    return controlled_gate(U(args), N, control, target, control_value)
 
 
 # Other Operations
@@ -45,30 +59,39 @@ def add_unitary_evo_gates(qc, detuning, signal_strength, dt):
 
     phi = gamma = -detuning * dt / 2
     theta = -signal_strength * dt
-    qc.add_gate("QASMU", arg_value=[theta, phi, gamma], targets=0)
+    qc.add_gate("U", arg_value=[theta, phi, gamma], targets=0)
 
     return qc
 
 
 def add_loss_gates(qc, theta_d):
-    qc.add_gate("CU", arg_value=[theta_d, 0, 0])
-    qc.add_gate("CNOT", targets=[0], controls=[1])
+    # qc.add_gate("CU", arg_value=[theta_d, 0, 0])
+    # qc.add_gate("CNOT", targets=[0], controls=[1])
+
+    qc.add_gate("U", targets=0, arg_value=[np.pi / 2, -np.pi, 0])
+    qc.add_gate("U", targets=1, arg_value=[-theta_d / 2, -np.pi / 2, np.pi])
+    qc.add_gate("CNOT", controls=1, targets=0)
+    qc.add_gate("U", targets=0, arg_value=[np.pi / 2, -np.pi / 2, 0])
+    qc.add_gate("U", targets=1, arg_value=[-theta_d / 2, np.pi, np.pi / 2])
+    qc.add_gate("CNOT", controls=1, targets=0)
+    qc.add_gate("U", targets=0, arg_value=[0, 0, -np.pi / 2])
+    qc.add_gate("U", targets=1, arg_value=[0, 0, -np.pi / 2])
 
     return qc
 
 
 def add_gain_gates(qc, theta_g):
-    qc.add_gate("QASMU", targets=0, arg_value=[-np.pi, 0, 0])
+    qc.add_gate("U", targets=0, arg_value=[-np.pi, 0, 0])
     qc.add_gate("CNOT", targets=[1], controls=[0])
     qc.add_gate("CU", arg_value=[theta_g, 0, 0])
     qc.add_gate("CNOT", targets=[1], controls=[0])
-    qc.add_gate("QASMU", targets=0, arg_value=[np.pi, 0, 0])
+    qc.add_gate("U", targets=0, arg_value=[np.pi, 0, 0])
 
     return qc
 
 
 def unitary_circuit(detuning, signal_strength, dt):
-    qc = QubitCircuit(2)
+    qc = QubitCircuit(2, user_gates={"U": U})
     add_unitary_evo_gates(qc, detuning, signal_strength, dt)
 
     return qc
@@ -78,7 +101,7 @@ def unitary_and_damping_circuit(detuning, signal_strength, dt, theta):
     def CUc0t1(args):
         return CU(args)
 
-    qc = QubitCircuit(2, user_gates={"CU": CUc0t1}, num_cbits=1)
+    qc = QubitCircuit(2, user_gates={"U": U, "CU": CUc0t1}, num_cbits=1)
 
     add_unitary_evo_gates(qc, detuning, signal_strength, dt)
 
@@ -97,12 +120,12 @@ def dissipative_circuits(theta_d, theta_g):
         return CU(args)
 
     # Loss
-    loss_qc = QubitCircuit(2, user_gates={"CU": CUc0t1}, num_cbits=1)
+    loss_qc = QubitCircuit(2, user_gates={"U": U, "CU": CUc0t1}, num_cbits=1)
     add_loss_gates(loss_qc, theta_d)
     loss_qc.add_measurement("M1", [1], classical_store=0)
 
     # Gain
-    gain_qc = QubitCircuit(2, user_gates={"CU": CUc0t1}, num_cbits=1)
+    gain_qc = QubitCircuit(2, user_gates={"U": U, "CU": CUc0t1}, num_cbits=1)
     add_gain_gates(gain_qc, theta_g)
     gain_qc.add_measurement("M2", [1], classical_store=0)
 

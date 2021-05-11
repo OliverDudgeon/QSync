@@ -1,7 +1,8 @@
 from functools import lru_cache
 from typing import Union
+
 import numpy as np
-from qutip import Qobj, expect, jmat, spin_state, steadystate, lindblad_dissipator, spin_q_function
+from qutip import Qobj, expect, jmat, lindblad_dissipator, sigmax, sigmay, sigmaz, spin_q_function, spin_state, steadystate
 from scipy import integrate
 from scipy.linalg import expm
 
@@ -126,3 +127,13 @@ def bloch_Q_function(mx, my, mz, phi, theta):
     return (1 + mx * np.cos(phi) * np.sin(theta) + my * np.sin(phi) * np.sin(theta) + mz * np.ones_like(phi) * np.cos(theta)) / (
         4 * np.pi
     )
+
+
+def dm2bloch(rhos):
+    if not all(isinstance(rho, Qobj) for rho in rhos):
+        rhos = [Qobj(rho) for rho in rhos]
+    xs = expect(sigmax(), rhos)
+    ys = expect(sigmay(), rhos)
+    zs = expect(sigmaz(), rhos)
+
+    return [xs, ys, zs]
