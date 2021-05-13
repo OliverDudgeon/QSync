@@ -129,6 +129,9 @@ def bloch_Q_function(mx, my, mz, phi, theta):
     )
 
 
+# Utils
+
+
 def dm2bloch(rhos):
     if not all(isinstance(rho, Qobj) for rho in rhos):
         rhos = [Qobj(rho) for rho in rhos]
