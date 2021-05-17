@@ -152,13 +152,13 @@ def run_simu(qc, interations, initial_state=basis(2, 0)):
 #     b.add_states(final.ptrace(0))
 
 
-def add_tomography(circuit):
+def add_tomography(circuit, nqubits):
     """Qiskit: Add tomography circuits with measurments on existing classical register"""
     # This function add gates to the end of circuits but the measurments add to a new classical register.
     # This additional register messes with noise mitigation so the next function adds the same gates but
     # the classical register is reused.
 
-    for i in range(3):
+    for i in range(3 if nqubits == 1 else 9):
         c = deepcopy(circuit)
         qreg = c.qregs[0]
         creg = c.cregs[0]
@@ -166,14 +166,56 @@ def add_tomography(circuit):
         c.barrier()
         if i == 0:
             c.h(qreg[0])
-            c.name = f"('X',)"  # Need to addjust names for StateTomographyFitter
+            c.name = "('X',)"  # Need to addjust names for StateTomographyFitter
+            if nqubits == 2:
+                c.h(qreg[1])
+                c.name = "('X', 'X')"
         elif i == 1:
+            if nqubits == 1:
+                c.sdg(qreg[0])
+                c.h(qreg[0])
+                c.name = "('Y',)"
+            elif nqubits == 2:
+                c.h(qreg[0])
+                c.sdg(qreg[1])
+                c.measure(qreg[0], creg[0])
+                c.h(qreg[1])
+                c.name = "('X', 'Y')"
+        elif i == 2:
+            c.name = "('Z',)"
+            if nqubits == 2:
+                c.h(qreg[0])
+                c.name = "('X', 'Z')"
+        elif i == 3:
+            c.name = "('Y', 'X')"
             c.sdg(qreg[0])
             c.h(qreg[0])
-            c.name = f"('Y',)"
-        elif i == 2:
-            c.name = f"('Z',)"
+            c.h(qreg[1])
+        elif i == 4:
+            c.name = "('Y', 'Y')"
+            c.sdg(qreg[0])
+            c.sdg(qreg[1])
+            c.h(qreg[0])
+            c.h(qreg[1])
+        elif i == 5:
+            c.name = "('Y', 'Z')"
+            c.sdg(qreg[0])
+            c.h(qreg[0])
+        elif i == 6:
+            c.name = "('Z', 'X')"
+            c.measure(qreg[0], creg[0])
+            c.h(qreg[1])
+        elif i == 7:
+            c.name = "('Z', 'Y')"
+            c.measure(qreg[0], creg[0])
+            c.sdg(qreg[1])
+            c.h(qreg[1])
+        elif i == 8:
+            c.name = "('Z', 'Z')"
 
-        c.measure(qreg[0], creg[0])
+        if i != 1 and i != 6 and i != 7:
+            c.measure(qreg[0], creg[0])
+        if nqubits == 2:
+            c.measure(qreg[1], creg[1])
 
         yield c
