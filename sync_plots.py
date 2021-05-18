@@ -70,8 +70,20 @@ coherent_xlabel = r"$\rm{Re}(\alpha)$"
 coherent_ylabel = r"$\rm{Im}(\alpha)$"
 
 
-def pi_formatter(val, _):
-    return "{:.0g}$\pi$".format(val / np.pi) if val != 0 else "0"
+def pi_formatter(value, tick_number):
+    # find number of multiples of pi/2
+    N = int(np.round(2 * np.abs(value) / np.pi))
+    sgn = "-" if np.sign(value) == -1 else ""
+    if N == 0:
+        return "0"
+    elif N == 1:
+        return r"${0}\pi/2$".format(sgn)
+    elif N == 2:
+        return r"${0}\pi$".format(sgn)
+    elif N % 2 > 0:
+        return r"${0}\pi/2$".format(N)
+    else:
+        return r"${0}\pi$".format(N // 2)
 
 
 def angle_xaxis(ax):

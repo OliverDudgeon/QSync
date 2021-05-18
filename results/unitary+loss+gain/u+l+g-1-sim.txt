@@ -1,0 +1,32 @@
+# Parameters
+# Simulation Steps
+SIM_STEPS = 7
+SHOTS = 8192
+
+# Qubits of physical device to use
+# Ordered from zero
+main = 1
+ancilla = 0
+
+gain_amp = 0.1
+loss_amp = 1
+m = min(loss_amp, gain_amp)
+
+detuning = 8 * 3 * m
+signal_strength = 8 * 2 * m
+# dt = 0.1
+dt = (np.logspace(0.4, 0.8, SIM_STEPS, endpoint=True)) / 10
+dt
+
+Calibration:
+dc9a0a1d13884a55b01874b0d74f03e8-16213374865049043
+
+Simulation:
+2644625df4a34064afc8b76fcf4d2796-1621338500499905
+589beebe42ad40908914020677851fb4-16213385005009058
+e7e5cd8612e7467ea990243d930668cb-16213385005049098
+ac89d9bb6dc94c4d8ee5cb222e2e4858-16213385005084164
+6548147da2274585b8e89a5ad068348a-16213385006245224
+958594ab02164d4baf82314882ba508d-16213385006335306
+25aea8fc7d384706820e374d9e0de8f9-16213385006435401
+7bbab98473a344638902cf3159854477-16213385006515472
