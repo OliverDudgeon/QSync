@@ -4,7 +4,7 @@ from typing import Literal, Optional, Tuple
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import FuncFormatter, MultipleLocator
+from matplotlib.ticker import FuncFormatter, MultipleLocator, FixedFormatter
 from qutip import qfunc, wigner
 
 from sync_calcs import spin_husimi_qfunc, spin_S_measure
@@ -14,12 +14,12 @@ tex_fonts = {
     "text.usetex": True,
     "font.family": "serif",
     # Use 10pt font in plots, to match 10pt font in document
-    "axes.labelsize": 14,
-    "font.size": 14,
+    "axes.labelsize": 11,
+    "font.size": 11,
     # Make the legend/label fonts a little smaller
-    "legend.fontsize": 12,
-    "xtick.labelsize": 12,
-    "ytick.labelsize": 12,
+    "legend.fontsize": 11,
+    "xtick.labelsize": 11,
+    "ytick.labelsize": 11,
 }
 plt.rcParams.update(tex_fonts)
 
@@ -88,12 +88,12 @@ def pi_formatter(value, tick_number):
 
 def angle_xaxis(ax):
     ax.xaxis.set_major_formatter(FuncFormatter(pi_formatter))
-    ax.xaxis.set_major_locator(MultipleLocator(base=np.pi))
+    ax.xaxis.set_major_locator(MultipleLocator(base=np.pi / 2))
 
 
 def angle_yaxis(ax):
     ax.yaxis.set_major_formatter(FuncFormatter(pi_formatter))
-    ax.yaxis.set_major_locator(MultipleLocator(base=np.pi))
+    ax.yaxis.set_major_locator(MultipleLocator(base=np.pi / 2))
 
 
 def plot_representation(
@@ -127,7 +127,7 @@ plot_wigner = partial(plot_representation, "wigner")
 plot_qfunc = partial(plot_representation, "qfunc")
 
 
-def plot_spin_qfunc(Q, theta, phi, *, cmap=None, ax=None, fig=None, **kwargs):
+def plot_spin_qfunc(Q, theta, phi, *, cbar_step=0.05, cmap=None, ax=None, fig=None, **kwargs):
     if bool(fig) ^ bool(ax):
         raise TypeError("A fig and ax must be both passed or not at all")
     if ax is None:
@@ -148,10 +148,13 @@ def plot_spin_qfunc(Q, theta, phi, *, cmap=None, ax=None, fig=None, **kwargs):
 
     cbar.set_label(r"$Q(\theta,\varphi\,|\,\hat\rho)$", rotation=270, labelpad=20)
 
+    cbar.ax.yaxis.set_major_locator(MultipleLocator(base=cbar_step))
+    cbar.ax.yaxis.set_major_formatter(FuncFormatter(lambda v, pos: f"{v:.2f}"))
+
     return img, ax
 
 
-def plot_S_measure(S, phi, *, ax=None, fig=None, **kwargs):
+def plot_S_measure(S, phi, *, yax_step=0.05, ax=None, fig=None, **kwargs):
     if bool(fig) ^ bool(ax):
         raise TypeError("A fig and ax must be both passed or not at all")
     if ax is None:
@@ -161,6 +164,8 @@ def plot_S_measure(S, phi, *, ax=None, fig=None, **kwargs):
     ax.set_xlim(np.min(phi), np.max(phi))
     ax.set_xlabel(r"$\varphi$")
     ax.set_ylabel(r"$S(\varphi\,|\,\hat\rho)$")
+
+    ax.yaxis.set_major_locator(MultipleLocator(base=yax_step))
 
     angle_xaxis(ax)
 

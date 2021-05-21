@@ -1,0 +1,60 @@
+SIMS PARAMS
+
+## Unitary + Loss
+# Spiral 10 Steps
+SIM_STEPS = 10
+SHOTS = 8192
+
+gain_amp = 0.1
+loss_amp = 1
+m = min(loss_amp, gain_amp)
+
+detuning = 10 * 3 * m
+signal_strength = 10 * 2 * m
+dt = (np.logspace(0.1, 0.7, SIM_STEPS, endpoint=True)) / 10
+
+# Spiral 4 Steps
+gain_amp = 0.1
+loss_amp = 1
+m = min(loss_amp, gain_amp)
+
+detuning = 8 * 3 * m
+signal_strength = 8 * 2 * m
+
+dt = 0.4
+
+## Unitary
+
+
+## U + L + G
+
+# Simulation Steps
+SIM_STEPS = 10
+SHOTS = 8192
+
+gain_amp = 0.1
+loss_amp = 1
+m = min(loss_amp, gain_amp)
+
+detuning = 8 * 3 * m
+signal_strength = 8 * 2 * m
+dt = (np.logspace(0.4, 0.8, SIM_STEPS, endpoint=True)) / 10
+
+# ULG 12 Steps
+
+SIM_STEPS = 12
+SHOTS = 8192
+
+# Qubits of physical device to use
+# Ordered from zero
+main = 3
+ancilla = 4
+
+gain_amp = 0.1
+loss_amp = 1
+m = min(loss_amp, gain_amp)
+
+detuning = 8 * 3 * m
+signal_strength = 8 * 2 * m
+# dt = 0.1
+dt = (np.logspace(0.1, 0.7, SIM_STEPS, endpoint=True)) / 10
