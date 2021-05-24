@@ -53,12 +53,10 @@ def reset(reg, bit, new):
 
 
 def add_unitary_evo_gates(qc, detuning, signal_strength, dt):
-    # qc.add_gate("RZ", arg_value=-detuning * dt / 2, targets=0)
-    # qc.add_gate("RY", arg_value=-signal_strength * dt, targets=0)
-    # qc.add_gate("RZ", arg_value=-detuning * dt / 2, targets=0)
+    theta = signal_strength * dt
+    phi = np.pi - detuning * dt / 2
+    gamma = np.pi - detuning * dt / 2
 
-    phi = gamma = -detuning * dt / 2
-    theta = -signal_strength * dt
     qc.add_gate("U", arg_value=[theta, phi, gamma], targets=0)
 
     return qc
